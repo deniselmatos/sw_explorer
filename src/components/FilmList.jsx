@@ -45,44 +45,38 @@ function FilmList() {
     setExpanded(expanded === id ? null : id);
   }
 
-  return (
-    <div>
-      <h2>Star Wars Films</h2>
+return (
+  <div>
+    <h2 style={{ textAlign: "center" }}>Star Wars Films</h2>
 
-      <div style={{ marginBottom: "20px" }}>
-        <label style={{ marginRight: "10px" }}>
-          Order by:
-        </label>
+    <div style={{ textAlign: "center", marginBottom: "20px" }}>
+      <label style={{ marginRight: "10px" }}>
+        Order by:
+      </label>
 
-        <select
-          value={order}
-          onChange={(e) => setOrder(e.target.value)}
-        >
-          <option value="release">Release Order</option>
-          <option value="chronological">
-            Chronological Order
-          </option>
-        </select>
-      </div>
+      <select
+        value={order}
+        onChange={(e) => setOrder(e.target.value)}
+      >
+        <option value="release">Release Order</option>
+        <option value="chronological">
+          Chronological Order
+        </option>
+      </select>
+    </div>
 
-      {loading && <p>Loading films...</p>}
+    {loading && (
+      <p style={{ textAlign: "center" }}>Loading films...</p>
+    )}
 
+    <div className="results-container">
       {films.map((film) => (
-        <div
-          key={film.episode_id}
-          style={{
-            padding: "15px",
-            marginBottom: "15px",
-            borderRadius: "8px"
-          }}
-        >
+        <div key={film.episode_id} className="result-card">
           <h3>
-            Episode {film.episode_id} — Star Wars: {film.title}
+            Episode {film.episode_id} — {film.title}
           </h3>
 
-          <button
-            onClick={() => toggleExpand(film.episode_id)}
-          >
+          <button onClick={() => toggleExpand(film.episode_id)}>
             {expanded === film.episode_id
               ? "Hide"
               : "View details"}
@@ -90,22 +84,10 @@ function FilmList() {
 
           {expanded === film.episode_id && (
             <div style={{ marginTop: "15px" }}>
-              <p>
-                <strong>Director:</strong>{" "}
-                {film.director}
-              </p>
+              <p><strong>Director:</strong> {film.director}</p>
+              <p><strong>Producer:</strong> {film.producer}</p>
+              <p><strong>Release Date:</strong> {formatDate(film.release_date)}</p>
 
-              <p>
-                <strong>Producer:</strong>{" "}
-                {film.producer}
-              </p>
-
-              <p>
-                <strong>Release Date:</strong>{" "}
-                {formatDate(film.release_date)}
-              </p>
-
-              <h4>Opening Crawl</h4>
               <p style={{ whiteSpace: "pre-line" }}>
                 {film.opening_crawl}
               </p>
@@ -114,7 +96,8 @@ function FilmList() {
         </div>
       ))}
     </div>
-  );
+  </div>
+);
 }
 
 export default FilmList;

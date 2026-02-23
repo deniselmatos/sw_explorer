@@ -58,25 +58,30 @@ The manufacturer is ${ship.manufacturer}.`;
     setExpanded(expanded === name ? null : name);
   }
 
-  return (
-    <div>
-      <h2>Starships</h2>
+ return (
+  <div>
+    <h2 style={{ textAlign: "center" }}>Starships</h2>
 
+    <div style={{ textAlign: "center", marginBottom: "20px" }}>
       <input
         type="text"
         placeholder="Search starship..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
+    </div>
 
-      {loading && <p>Loading starships...</p>}
+    {loading && (
+      <p style={{ textAlign: "center" }}>Loading starships...</p>
+    )}
 
-      {!loading && filteredStarships.length === 0 && (
-        <p>No starships found.</p>
-      )}
+    {!loading && filteredStarships.length === 0 && (
+      <p style={{ textAlign: "center" }}>No starships found.</p>
+    )}
 
+    <div className="results-container">
       {filteredStarships.map((ship) => (
-        <div key={ship.name}>
+        <div key={ship.name} className="result-card">
           <h3>{ship.name}</h3>
 
           <button onClick={() => toggleExpand(ship.name)}>
@@ -89,7 +94,8 @@ The manufacturer is ${ship.manufacturer}.`;
         </div>
       ))}
     </div>
-  );
+  </div>
+);
 }
 
 export default StarshipList;

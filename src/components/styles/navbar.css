@@ -1,0 +1,26 @@
+.navbar {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-logo {
+  margin: 0;
+  cursor: pointer;
+}
+
+.navbar-buttons {
+  display: flex;
+  gap: 20px; 
+}
+
+.navbar-button {
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius: 6px;
+}

@@ -54,25 +54,28 @@ with about ${formatValue(planet.surface_water, "%")} surface water.`;
     setExpanded(expanded === name ? null : name);
   }
 
-  return (
-    <div>
-      <h2>Planets</h2>
+return (
+  <div>
+    <h2 style={{ textAlign: "center" }}>Planets</h2>
 
+    <div style={{ textAlign: "center", marginBottom: "20px" }}>
       <input
         type="text"
         placeholder="Search planet..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
+    </div>
 
-      {loading && <p>Loading planets...</p>}
+    {loading && <p style={{ textAlign: "center" }}>Loading planets...</p>}
 
-      {!loading && filteredPlanets.length === 0 && (
-        <p>No planets found.</p>
-      )}
+    {!loading && filteredPlanets.length === 0 && (
+      <p style={{ textAlign: "center" }}>No planets found.</p>
+    )}
 
+    <div className="results-container">
       {filteredPlanets.map((planet) => (
-        <div key={planet.name}>
+        <div key={planet.name} className="result-card">
           <h3>{planet.name}</h3>
 
           <button onClick={() => toggleExpand(planet.name)}>
@@ -85,7 +88,8 @@ with about ${formatValue(planet.surface_water, "%")} surface water.`;
         </div>
       ))}
     </div>
-  );
+  </div>
+);
 }
 
 export default PlanetList;

@@ -36,24 +36,27 @@ function CharacterList() {
   }, [search, allCharacters]);
 
   return (
-    <div>
-      <h2>Characters</h2>
+  <div>
+    <h2 style={{ textAlign: "center" }}>Characters</h2>
 
+    <div style={{ textAlign: "center", marginBottom: "20px" }}>
       <input
         type="text"
         placeholder="Search character..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
+    </div>
 
-      {loading && <p>Loading characters...</p>}
+    {loading && <p style={{ textAlign: "center" }}>Loading characters...</p>}
 
-      {!loading && characters.length === 0 && (
-        <p>No characters found.</p>
-      )}
+    {!loading && characters.length === 0 && (
+      <p style={{ textAlign: "center" }}>No characters found.</p>
+    )}
 
+    <div className="results-container">
       {characters.map((character) => (
-        <div key={character.name}>
+        <div key={character.name} className="result-card">
           <h3>{character.name}</h3>
           <p>Height: {character.height}</p>
           <p>Mass: {character.mass}</p>
@@ -61,7 +64,8 @@ function CharacterList() {
         </div>
       ))}
     </div>
-  );
+  </div>
+);
 }
 
 export default CharacterList;

@@ -5,13 +5,14 @@ import PlanetList from "../components/PlanetList";
 import StarshipList from "../components/StarshipList";
 import SpeciesList from "../components/SpeciesList";
 import FilmList from "../components/FilmList";
+import "./styles/Explore.css";
 
 function Explore() {
   const [activeTab, setActiveTab] = useState("characters");
 
   return (
-    <div style={{ padding: "20px", background: "#fff", minHeight: "100vh", color: "black" }}>
-      <h1>Explore the Star Wars Universe</h1>
+    <div className="explore-container">
+      <p className="home-title">Explore the Star Wars Universe</p>
 
       <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
 

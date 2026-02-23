@@ -1,6 +1,6 @@
 function Tabs({ activeTab, setActiveTab }) {
   return (
-    <div style={{ marginBottom: "20px" }}>
+    <div className="tabs-container">
       <button onClick={() => setActiveTab("characters")}>
         Characters
       </button>

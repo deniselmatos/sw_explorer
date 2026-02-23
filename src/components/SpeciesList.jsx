@@ -52,39 +52,46 @@ They commonly speak ${specie.language}.`;
     setExpanded(expanded === name ? null : name);
   }
 
-  return (
-    <div>
-      <h2>Species</h2>
+return (
+  <div>
+    <h2 style={{ textAlign: "center" }}>Species</h2>
 
+    <div style={{ textAlign: "center", marginBottom: "20px" }}>
       <input
         type="text"
         placeholder="Search species..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
-
-      {loading && <p>Loading species...</p>}
-
-      {!loading && filteredSpecies.length === 0 && (
-        <p>No species found.</p>
-      )}
-
-      {!loading &&
-        filteredSpecies.map((specie) => (
-          <div key={specie.name}>
-            <h3>{specie.name}</h3>
-
-            <button onClick={() => toggleExpand(specie.name)}>
-              {expanded === specie.name ? "Hide" : "View more"}
-            </button>
-
-            {expanded === specie.name && (
-              <p>{generateDescription(specie)}</p>
-            )}
-          </div>
-        ))}
     </div>
-  );
+
+    {loading && (
+      <p style={{ textAlign: "center" }}>Loading species...</p>
+    )}
+
+    {!loading && filteredSpecies.length === 0 && (
+      <p style={{ textAlign: "center" }}>No species found.</p>
+    )}
+
+    <div className="results-container">
+      {filteredSpecies.map((specie) => (
+        <div key={specie.name} className="result-card">
+          <h3>{specie.name}</h3>
+
+          <button onClick={() => toggleExpand(specie.name)}>
+            {expanded === specie.name ? "Hide" : "View more"}
+          </button>
+
+          {expanded === specie.name && (
+            <p>{generateDescription(specie)}</p>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+);
 }
 
 export default SpeciesList;
+
+
