@@ -4,8 +4,8 @@ import { searchPlanets } from "../services/api";
 function PlanetList() {
   const [planets, setPlanets] = useState([]);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   function formatValue(value, unit = "") {
     if (!value || value === "unknown") return "Unknown";
@@ -29,15 +29,9 @@ with about ${formatValue(planet.surface_water, "%")} surface water.`;
 
   useEffect(() => {
     async function fetchPlanets() {
-      if (search.trim() === "") {
-        setPlanets([]);
-        return;
-      }
-
       setLoading(true);
-
       try {
-        const data = await searchPlanets(search);
+        const data = await searchPlanets("");
         setPlanets(data);
       } catch (error) {
         console.error("Error fetching planets:", error);
@@ -47,7 +41,14 @@ with about ${formatValue(planet.surface_water, "%")} surface water.`;
     }
 
     fetchPlanets();
-  }, [search]);
+  }, []);
+
+  const filteredPlanets =
+    search.trim() === ""
+      ? planets
+      : planets.filter((planet) =>
+          planet.name.toLowerCase().includes(search.toLowerCase())
+        );
 
   function toggleExpand(name) {
     setExpanded(expanded === name ? null : name);
@@ -64,13 +65,13 @@ with about ${formatValue(planet.surface_water, "%")} surface water.`;
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      {loading && <p>Searching planets...</p>}
+      {loading && <p>Loading planets...</p>}
 
-      {!loading && search.trim() !== "" && planets.length === 0 && (
+      {!loading && filteredPlanets.length === 0 && (
         <p>No planets found.</p>
       )}
 
-      {planets.map((planet) => (
+      {filteredPlanets.map((planet) => (
         <div key={planet.name}>
           <h3>{planet.name}</h3>
 

@@ -47,9 +47,12 @@ The manufacturer is ${ship.manufacturer}.`;
     fetchStarships();
   }, []);
 
-  const filteredStarships = starships.filter((ship) =>
-    ship.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredStarships =
+    search.trim() === ""
+      ? starships
+      : starships.filter((ship) =>
+          ship.name.toLowerCase().includes(search.toLowerCase())
+        );
 
   function toggleExpand(name) {
     setExpanded(expanded === name ? null : name);
@@ -64,40 +67,27 @@ The manufacturer is ${ship.manufacturer}.`;
         placeholder="Search starship..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        style={{ padding: "8px", marginBottom: "20px" }}
       />
 
       {loading && <p>Loading starships...</p>}
 
-      {!loading &&
-        search.trim() !== "" &&
-        filteredStarships.length === 0 && (
-          <p>No starships found.</p>
-        )}
+      {!loading && filteredStarships.length === 0 && (
+        <p>No starships found.</p>
+      )}
 
-      {search.trim() !== "" &&
-        filteredStarships.map((ship) => (
-          <div
-            key={ship.name}
-            style={{
-              padding: "15px",
-              marginBottom: "15px",
-              borderRadius: "8px"
-            }}
-          >
-            <h3>{ship.name}</h3>
+      {filteredStarships.map((ship) => (
+        <div key={ship.name}>
+          <h3>{ship.name}</h3>
 
-            <button onClick={() => toggleExpand(ship.name)}>
-              {expanded === ship.name ? "Hide" : "View more"}
-            </button>
+          <button onClick={() => toggleExpand(ship.name)}>
+            {expanded === ship.name ? "Hide" : "View more"}
+          </button>
 
-            {expanded === ship.name && (
-              <div style={{ marginTop: "15px", lineHeight: "1.6" }}>
-                <p>{generateDescription(ship)}</p>
-              </div>
-            )}
-          </div>
-        ))}
+          {expanded === ship.name && (
+            <p>{generateDescription(ship)}</p>
+          )}
+        </div>
+      ))}
     </div>
   );
 }

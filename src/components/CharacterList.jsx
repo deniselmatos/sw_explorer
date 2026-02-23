@@ -2,21 +2,17 @@ import { useEffect, useState } from "react";
 import { searchPeople } from "../services/api";
 
 function CharacterList() {
+  const [allCharacters, setAllCharacters] = useState([]);
   const [characters, setCharacters] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    async function fetchSearch() {
-      if (search.trim() === "") {
-        setCharacters([]);
-        return;
-      }
-
+    async function fetchCharacters() {
       setLoading(true);
-
       try {
-        const data = await searchPeople(search);
+        const data = await searchPeople(""); 
+        setAllCharacters(data);
         setCharacters(data);
       } catch (error) {
         console.error("Search error:", error);
@@ -25,8 +21,19 @@ function CharacterList() {
       }
     }
 
-    fetchSearch();
-  }, [search]);
+    fetchCharacters();
+  }, []);
+
+  useEffect(() => {
+    if (search.trim() === "") {
+      setCharacters(allCharacters);
+    } else {
+      const filtered = allCharacters.filter((character) =>
+        character.name.toLowerCase().includes(search.toLowerCase())
+      );
+      setCharacters(filtered);
+    }
+  }, [search, allCharacters]);
 
   return (
     <div>
@@ -39,9 +46,9 @@ function CharacterList() {
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      {loading && <p>Searching...</p>}
+      {loading && <p>Loading characters...</p>}
 
-      {!loading && search.trim() !== "" && characters.length === 0 && (
+      {!loading && characters.length === 0 && (
         <p>No characters found.</p>
       )}
 

@@ -14,7 +14,7 @@ function Home() {
 
       <p className="home-text">
         Star Wars is one of the greatest science fiction sagas of all time.
-        Explore characters, planets, starships and films from the universe
+        Explore characters, planets, starships, species and films from the universe
         created by George Lucas.
       </p>
 

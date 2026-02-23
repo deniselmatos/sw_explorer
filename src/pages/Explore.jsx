@@ -3,6 +3,7 @@ import Tabs from "../components/Tabs";
 import CharacterList from "../components/CharacterList";
 import PlanetList from "../components/PlanetList";
 import StarshipList from "../components/StarshipList";
+import SpeciesList from "../components/SpeciesList";
 import FilmList from "../components/FilmList";
 
 function Explore() {
@@ -10,7 +11,7 @@ function Explore() {
 
   return (
     <div style={{ padding: "20px", background: "#fff", minHeight: "100vh", color: "black" }}>
-      <h1>Explorar Universo Star Wars</h1>
+      <h1>Explore the Star Wars Universe</h1>
 
       <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
@@ -18,6 +19,7 @@ function Explore() {
       {activeTab === "characters" && <CharacterList />}
       {activeTab === "planets" && <PlanetList />}
       {activeTab === "starships" && <StarshipList />}
+      {activeTab === "species" && <SpeciesList />}
       {activeTab === "films" && <FilmList />}
     </div>
   );

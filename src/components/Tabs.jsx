@@ -2,19 +2,23 @@ function Tabs({ activeTab, setActiveTab }) {
   return (
     <div style={{ marginBottom: "20px" }}>
       <button onClick={() => setActiveTab("characters")}>
-        👤 Personagens
+        Characters
       </button>
 
       <button onClick={() => setActiveTab("planets")}>
-        🌍 Planetas
+        Planets
       </button>
 
       <button onClick={() => setActiveTab("starships")}>
-        🚀 Naves
+        Starships
+      </button>
+
+      <button onClick={() => setActiveTab("species")}>
+        Species
       </button>
 
       <button onClick={() => setActiveTab("films")}>
-        🎬 Filmes
+        Films
       </button>
     </div>
   );
