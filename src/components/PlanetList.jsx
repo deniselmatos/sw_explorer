@@ -1,37 +1,20 @@
 import { useEffect, useState } from "react";
-import { searchPlanets } from "../services/api";
+import { getPlanets } from "../services/api";
 
 function PlanetList() {
   const [planets, setPlanets] = useState([]);
-  const [search, setSearch] = useState("");
-  const [expanded, setExpanded] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [expanded, setExpanded] = useState(null);
 
-  function formatValue(value, unit = "") {
-    if (!value || value === "unknown") return "Unknown";
-
-    if (!isNaN(value)) {
-      const formatted = Number(value).toLocaleString("en-US");
-      return unit ? `${formatted} ${unit}` : formatted;
-    }
-
-    return unit ? `${value} ${unit}` : value;
-  }
-
-  function generatePlanetDescription(planet) {
-    return `${planet.name} has a ${planet.climate} climate and ${planet.terrain} terrain. 
-It has a diameter of approximately ${formatValue(planet.diameter, "km")} 
-and takes ${formatValue(planet.orbital_period, "days")} to orbit its star. 
-Its gravity is ${planet.gravity}. 
-The estimated population is ${formatValue(planet.population)} inhabitants, 
-with about ${formatValue(planet.surface_water, "%")} surface water.`;
-  }
+  const [climate, setClimate] = useState("all");
+  const [minPopulation, setMinPopulation] = useState("");
+  const [maxPopulation, setMaxPopulation] = useState("");
 
   useEffect(() => {
     async function fetchPlanets() {
       setLoading(true);
       try {
-        const data = await searchPlanets("");
+        const data = await getPlanets();
         setPlanets(data);
       } catch (error) {
         console.error("Error fetching planets:", error);
@@ -43,53 +26,112 @@ with about ${formatValue(planet.surface_water, "%")} surface water.`;
     fetchPlanets();
   }, []);
 
-  const filteredPlanets =
-    search.trim() === ""
-      ? planets
-      : planets.filter((planet) =>
-          planet.name.toLowerCase().includes(search.toLowerCase())
-        );
-
   function toggleExpand(name) {
     setExpanded(expanded === name ? null : name);
   }
 
-return (
-  <div>
-    <h2 style={{ textAlign: "center" }}>Planets</h2>
+  // Climas únicos
+  const uniqueClimates = [
+    ...new Set(planets.map(p => p.climate))
+  ];
 
-    <div style={{ textAlign: "center", marginBottom: "20px" }}>
-      <input
-        type="text"
-        placeholder="Search planet..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+  // Aplicar filtros
+  const filteredPlanets = planets.filter(planet => {
+
+    const matchClimate =
+      climate === "all" || planet.climate === climate;
+
+    const population = planet.population === "unknown"
+      ? null
+      : Number(planet.population);
+
+    const matchMin =
+      minPopulation === "" ||
+      (population !== null && population >= Number(minPopulation));
+
+    const matchMax =
+      maxPopulation === "" ||
+      (population !== null && population <= Number(maxPopulation));
+
+    return matchClimate && matchMin && matchMax;
+  });
+
+  return (
+    <div>
+      <h2 style={{ textAlign: "center" }}>
+        Star Wars Planets
+      </h2>
+
+      {/* FILTROS */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          gap: "15px",
+          flexWrap: "wrap",
+          marginBottom: "30px"
+        }}
+      >
+        <select
+          value={climate}
+          onChange={(e) => setClimate(e.target.value)}
+        >
+          <option value="all">All Climates</option>
+          {uniqueClimates.map((c, index) => (
+            <option key={index} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+
+        <input
+          type="number"
+          placeholder="Min Population"
+          value={minPopulation}
+          onChange={(e) => setMinPopulation(e.target.value)}
+        />
+
+        <input
+          type="number"
+          placeholder="Max Population"
+          value={maxPopulation}
+          onChange={(e) => setMaxPopulation(e.target.value)}
+        />
+      </div>
+
+      {loading && (
+        <p style={{ textAlign: "center" }}>
+          Loading planets...
+        </p>
+      )}
+
+      <div className="results-container">
+        {filteredPlanets.map((planet) => (
+          <div key={planet.name} className="result-card">
+
+            <h3>{planet.name}</h3>
+
+            <button onClick={() => toggleExpand(planet.name)}>
+              {expanded === planet.name
+                ? "Hide"
+                : "View details"}
+            </button>
+
+            {expanded === planet.name && (
+              <div style={{ marginTop: "15px" }}>
+                <p><strong>Climate:</strong> {planet.climate}</p>
+                <p><strong>Terrain:</strong> {planet.terrain}</p>
+                <p><strong>Population:</strong> {planet.population}</p>
+                <p><strong>Gravity:</strong> {planet.gravity}</p>
+                <p><strong>Diameter:</strong> {planet.diameter}</p>
+              </div>
+            )}
+
+          </div>
+        ))}
+      </div>
     </div>
-
-    {loading && <p style={{ textAlign: "center" }}>Loading planets...</p>}
-
-    {!loading && filteredPlanets.length === 0 && (
-      <p style={{ textAlign: "center" }}>No planets found.</p>
-    )}
-
-    <div className="results-container">
-      {filteredPlanets.map((planet) => (
-        <div key={planet.name} className="result-card">
-          <h3>{planet.name}</h3>
-
-          <button onClick={() => toggleExpand(planet.name)}>
-            {expanded === planet.name ? "Hide" : "View more"}
-          </button>
-
-          {expanded === planet.name && (
-            <p>{generatePlanetDescription(planet)}</p>
-          )}
-        </div>
-      ))}
-    </div>
-  </div>
-);
+  );
 }
 
 export default PlanetList;

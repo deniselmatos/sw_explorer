@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { getStarships } from "../services/api";
+import { useFavorites } from "../context/FavoritesContext";
+
 
 function StarshipList() {
   const [starships, setStarships] = useState([]);
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState(null);
   const [loading, setLoading] = useState(false);
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   function formatValue(value, unit = "") {
     if (!value || value === "unknown") return "Unknown";
@@ -91,6 +94,15 @@ The manufacturer is ${ship.manufacturer}.`;
           {expanded === ship.name && (
             <p>{generateDescription(ship)}</p>
           )}
+          <button onClick={() =>
+            toggleFavorite({
+              id: ship.name,
+              type: "starship",
+              data: ship
+            })
+          }>
+            {isFavorite(ship.name) ? "★" : "☆"}
+          </button>
         </div>
       ))}
     </div>

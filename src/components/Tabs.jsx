@@ -20,6 +20,10 @@ function Tabs({ activeTab, setActiveTab }) {
       <button onClick={() => setActiveTab("films")}>
         Films
       </button>
+
+      <button onClick={() => setActiveTab("favorites")}>
+         Favorites
+      </button>
     </div>
   );
 }
