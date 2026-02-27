@@ -21,9 +21,6 @@ function Tabs({ activeTab, setActiveTab }) {
         Films
       </button>
 
-      <button onClick={() => setActiveTab("favorites")}>
-         Favorites
-      </button>
     </div>
   );
 }

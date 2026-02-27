@@ -1,113 +1,70 @@
 import { useEffect, useState } from "react";
 import { getStarships } from "../services/api";
 import { useFavorites } from "../context/FavoritesContext";
-
+import Modal from "./Modal";
 
 function StarshipList() {
   const [starships, setStarships] = useState([]);
   const [search, setSearch] = useState("");
-  const [expanded, setExpanded] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [selected, setSelected] = useState(null);
+
   const { toggleFavorite, isFavorite } = useFavorites();
 
-  function formatValue(value, unit = "") {
-    if (!value || value === "unknown") return "Unknown";
-
-    const cleanValue = value.replace(/,/g, "");
-
-    if (!isNaN(cleanValue)) {
-      return (
-        Number(cleanValue).toLocaleString("en-US") +
-        (unit ? ` ${unit}` : "")
-      );
-    }
-
-    return value;
-  }
-
-  function generateDescription(ship) {
-    return `${ship.name} is a ${ship.starship_class}. 
-It has an approximate length of ${formatValue(ship.length, "m")} 
-and a maximum atmospheric speed of ${formatValue(ship.max_atmosphering_speed)}. 
-It can carry up to ${formatValue(ship.crew)} crew members and 
-${formatValue(ship.passengers)} passengers. 
-The manufacturer is ${ship.manufacturer}.`;
-  }
-
   useEffect(() => {
-    async function fetchStarships() {
-      setLoading(true);
-      try {
-        const data = await getStarships();
-        setStarships(data);
-      } catch (error) {
-        console.error("Error fetching starships:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchStarships();
+    getStarships().then(setStarships);
   }, []);
 
-  const filteredStarships =
-    search.trim() === ""
-      ? starships
-      : starships.filter((ship) =>
-          ship.name.toLowerCase().includes(search.toLowerCase())
-        );
+  const filtered = starships.filter(s =>
+    s.name.toLowerCase().includes(search.toLowerCase())
+  );
 
-  function toggleExpand(name) {
-    setExpanded(expanded === name ? null : name);
-  }
+  return (
+    <div>
+      <h2 style={{ textAlign: "center" }}>Starships</h2>
 
- return (
-  <div>
-    <h2 style={{ textAlign: "center" }}>Starships</h2>
+      <div style={{ textAlign: "center", marginBottom: 20 }}>
+        <input
+          placeholder="Search starship..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+      </div>
 
-    <div style={{ textAlign: "center", marginBottom: "20px" }}>
-      <input
-        type="text"
-        placeholder="Search starship..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+      <div className="results-container">
+        {filtered.map(s => (
+          <div key={s.name} className="result-card">
+            <h3>{s.name}</h3>
+
+            <button onClick={() => setSelected(s)}>
+              View Details
+            </button>
+
+            <button onClick={() =>
+              toggleFavorite({ id: s.name, type: "starship", data: s })
+            }>
+              {isFavorite(s.name, "starship") ? "★" : "☆"}
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <Modal isOpen={!!selected} onClose={() => setSelected(null)}>
+        {selected && (
+          <>
+            <h2>{selected.name}</h2>
+            <p>
+              {selected.name} is a {selected.starship_class}
+              {" "}manufactured by {selected.manufacturer}.
+              It has a length of {selected.length} meters,
+              can carry {selected.crew} crew members and
+              {" "}up to {selected.passengers} passengers.
+              The hyperdrive rating is {selected.hyperdrive_rating}.
+            </p>
+          </>
+        )}
+      </Modal>
     </div>
-
-    {loading && (
-      <p style={{ textAlign: "center" }}>Loading starships...</p>
-    )}
-
-    {!loading && filteredStarships.length === 0 && (
-      <p style={{ textAlign: "center" }}>No starships found.</p>
-    )}
-
-    <div className="results-container">
-      {filteredStarships.map((ship) => (
-        <div key={ship.name} className="result-card">
-          <h3>{ship.name}</h3>
-
-          <button onClick={() => toggleExpand(ship.name)}>
-            {expanded === ship.name ? "Hide" : "View more"}
-          </button>
-
-          {expanded === ship.name && (
-            <p>{generateDescription(ship)}</p>
-          )}
-          <button onClick={() =>
-            toggleFavorite({
-              id: ship.name,
-              type: "starship",
-              data: ship
-            })
-          }>
-            {isFavorite(ship.name) ? "★" : "☆"}
-          </button>
-        </div>
-      ))}
-    </div>
-  </div>
-);
+  );
 }
 
 export default StarshipList;

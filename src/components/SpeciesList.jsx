@@ -1,97 +1,90 @@
 import { useEffect, useState } from "react";
 import { getSpecies } from "../services/api";
+import { useFavorites } from "../context/FavoritesContext";
+import Modal from "./Modal";
 
 function SpeciesList() {
   const [species, setSpecies] = useState([]);
   const [search, setSearch] = useState("");
-  const [expanded, setExpanded] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [classification, setClassification] = useState("all");
+  const [selected, setSelected] = useState(null);
 
-  function formatValue(value, unit = "") {
-    if (!value || value === "unknown") return "Unknown";
-
-    if (!isNaN(value)) {
-      return Number(value).toLocaleString("en-US") + (unit ? ` ${unit}` : "");
-    }
-
-    return value;
-  }
-
-  function generateDescription(specie) {
-    return `${specie.name} is classified as ${specie.classification} 
-with a designation of ${specie.designation}. 
-The average height is ${formatValue(specie.average_height, "cm")} 
-and the average lifespan is ${formatValue(specie.average_lifespan, "years")}. 
-They commonly speak ${specie.language}.`;
-  }
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   useEffect(() => {
-    async function fetchSpecies() {
-      setLoading(true);
-      try {
-        const data = await getSpecies(); // 👈 AQUI está a correção
-        setSpecies(data);
-      } catch (error) {
-        console.error("Error fetching species:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchSpecies();
+    getSpecies().then(setSpecies);
   }, []);
 
-  const filteredSpecies =
-    search.trim() === ""
-      ? species
-      : species.filter((specie) =>
-          specie.name.toLowerCase().includes(search.toLowerCase())
-        );
+  const uniqueClassifications = [
+    ...new Set(species.map(s => s.classification))
+  ];
 
-  function toggleExpand(name) {
-    setExpanded(expanded === name ? null : name);
-  }
+  const filtered = species.filter(s => {
+    const matchSearch =
+      s.name.toLowerCase().includes(search.toLowerCase());
 
-return (
-  <div>
-    <h2 style={{ textAlign: "center" }}>Species</h2>
+    const matchClass =
+      classification === "all" ||
+      s.classification === classification;
 
-    <div style={{ textAlign: "center", marginBottom: "20px" }}>
-      <input
-        type="text"
-        placeholder="Search species..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
-    </div>
+    return matchSearch && matchClass;
+  });
 
-    {loading && (
-      <p style={{ textAlign: "center" }}>Loading species...</p>
-    )}
+  return (
+    <div>
+      <h2 style={{ textAlign: "center" }}>Species</h2>
 
-    {!loading && filteredSpecies.length === 0 && (
-      <p style={{ textAlign: "center" }}>No species found.</p>
-    )}
+      <div style={{ textAlign: "center", marginBottom: 20 }}>
+        <input
+          placeholder="Search species..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
 
-    <div className="results-container">
-      {filteredSpecies.map((specie) => (
-        <div key={specie.name} className="result-card">
-          <h3>{specie.name}</h3>
-
-          <button onClick={() => toggleExpand(specie.name)}>
-            {expanded === specie.name ? "Hide" : "View more"}
-          </button>
-
-          {expanded === specie.name && (
-            <p>{generateDescription(specie)}</p>
+        <select
+          value={classification}
+          onChange={e => setClassification(e.target.value)}
+        >
+          <option value="all">All Classifications</option>
+          {uniqueClassifications.map((c, i) =>
+            <option key={i}>{c}</option>
           )}
-        </div>
-      ))}
+        </select>
+      </div>
+
+      <div className="results-container">
+        {filtered.map(s => (
+          <div key={s.name} className="result-card">
+            <h3>{s.name}</h3>
+
+            <button onClick={() => setSelected(s)}>
+              View Details
+            </button>
+
+            <button onClick={() =>
+              toggleFavorite({ id: s.name, type: "species", data: s })
+            }>
+              {isFavorite(s.name, "species") ? "★" : "☆"}
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <Modal isOpen={!!selected} onClose={() => setSelected(null)}>
+        {selected && (
+          <>
+            <h2>{selected.name}</h2>
+            <p>
+              {selected.name} is classified as {selected.classification}
+              {" "}and has an average lifespan of {selected.average_lifespan}.
+              {" "}They typically speak {selected.language} and have an
+              average height of {selected.average_height} centimeters.
+            </p>
+          </>
+        )}
+      </Modal>
     </div>
-  </div>
-);
+  );
 }
 
 export default SpeciesList;
-
-

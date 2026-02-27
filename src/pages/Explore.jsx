@@ -6,7 +6,6 @@ import StarshipList from "../components/StarshipList";
 import SpeciesList from "../components/SpeciesList";
 import FilmList from "../components/FilmList";
 import "./styles/Explore.css";
-import FavoritesList from "../components/FavoritesList";
 
 function Explore() {
   const [activeTab, setActiveTab] = useState("characters");
@@ -23,7 +22,6 @@ function Explore() {
       {activeTab === "starships" && <StarshipList />}
       {activeTab === "species" && <SpeciesList />}
       {activeTab === "films" && <FilmList />}
-      {activeTab === "favorites" && <FavoritesList />}
     </div>
   );
 }

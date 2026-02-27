@@ -18,6 +18,10 @@ function Navbar() {
         <button className="navbar-button" onClick={() => navigate("/explore")}>
           Explorer
         </button>
+
+        <button className="navbar-button" onClick={() => navigate("/favorites")}>
+          Favorites and Lists
+        </button>
       </div>
     </nav>
   );

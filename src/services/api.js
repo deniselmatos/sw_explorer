@@ -1,31 +1,36 @@
 const BASE_URL = "https://swapi.dev/api";
 
+async function fetchAll(endpoint) {
+  let results = [];
+  let nextUrl = `${BASE_URL}/${endpoint}/`;
+
+  while (nextUrl) {
+    const response = await fetch(nextUrl);
+    const data = await response.json();
+
+    results = [...results, ...data.results];
+    nextUrl = data.next;
+  }
+
+  return results;
+}
+
 export async function getCharacters() {
-  const response = await fetch(`${BASE_URL}/people/`);
-  const data = await response.json();
-  return data.results;
+  return fetchAll("people");
 }
 
 export async function getPlanets() {
-  const response = await fetch(`${BASE_URL}/planets/`);
-  const data = await response.json();
-  return data.results;
+  return fetchAll("planets");
 }
 
 export async function getFilms() {
-  const response = await fetch(`${BASE_URL}/films/`);
-  const data = await response.json();
-  return data.results;
+  return fetchAll("films");
 }
 
 export async function getStarships() {
-  const response = await fetch(`${BASE_URL}/starships/`);
-  const data = await response.json();
-  return data.results;
+  return fetchAll("starships");
 }
 
 export async function getSpecies() {
-  const response = await fetch(`${BASE_URL}/species/`);
-  const data = await response.json();
-  return data.results;
+  return fetchAll("species");
 }

@@ -1,135 +1,82 @@
 import { useEffect, useState } from "react";
 import { getPlanets } from "../services/api";
+import Modal from "./Modal";
+import { useFavorites } from "../context/FavoritesContext";
 
 function PlanetList() {
   const [planets, setPlanets] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [expanded, setExpanded] = useState(null);
-
+  const [search, setSearch] = useState("");
   const [climate, setClimate] = useState("all");
-  const [minPopulation, setMinPopulation] = useState("");
-  const [maxPopulation, setMaxPopulation] = useState("");
+  const [selected, setSelected] = useState(null);
+
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   useEffect(() => {
-    async function fetchPlanets() {
-      setLoading(true);
-      try {
-        const data = await getPlanets();
-        setPlanets(data);
-      } catch (error) {
-        console.error("Error fetching planets:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchPlanets();
+    getPlanets().then(setPlanets);
   }, []);
 
-  function toggleExpand(name) {
-    setExpanded(expanded === name ? null : name);
-  }
-
-  // Climas únicos
-  const uniqueClimates = [
-    ...new Set(planets.map(p => p.climate))
-  ];
-
-  // Aplicar filtros
-  const filteredPlanets = planets.filter(planet => {
+  const filtered = planets.filter(p => {
+    const matchSearch =
+      p.name.toLowerCase().includes(search.toLowerCase());
 
     const matchClimate =
-      climate === "all" || planet.climate === climate;
+      climate === "all" || p.climate === climate;
 
-    const population = planet.population === "unknown"
-      ? null
-      : Number(planet.population);
-
-    const matchMin =
-      minPopulation === "" ||
-      (population !== null && population >= Number(minPopulation));
-
-    const matchMax =
-      maxPopulation === "" ||
-      (population !== null && population <= Number(maxPopulation));
-
-    return matchClimate && matchMin && matchMax;
+    return matchSearch && matchClimate;
   });
+
+  const uniqueClimates = [...new Set(planets.map(p => p.climate))];
 
   return (
     <div>
-      <h2 style={{ textAlign: "center" }}>
-        Star Wars Planets
-      </h2>
+      <h2 style={{ textAlign: "center" }}>Planets</h2>
 
-      {/* FILTROS */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: "15px",
-          flexWrap: "wrap",
-          marginBottom: "30px"
-        }}
-      >
-        <select
-          value={climate}
-          onChange={(e) => setClimate(e.target.value)}
-        >
+      <div style={{ textAlign: "center", marginBottom: 20 }}>
+        <input
+          placeholder="Search planet..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+
+        <select value={climate} onChange={e => setClimate(e.target.value)}>
           <option value="all">All Climates</option>
-          {uniqueClimates.map((c, index) => (
-            <option key={index} value={c}>
-              {c}
-            </option>
-          ))}
+          {uniqueClimates.map((c,i) =>
+            <option key={i}>{c}</option>
+          )}
         </select>
-
-        <input
-          type="number"
-          placeholder="Min Population"
-          value={minPopulation}
-          onChange={(e) => setMinPopulation(e.target.value)}
-        />
-
-        <input
-          type="number"
-          placeholder="Max Population"
-          value={maxPopulation}
-          onChange={(e) => setMaxPopulation(e.target.value)}
-        />
       </div>
 
-      {loading && (
-        <p style={{ textAlign: "center" }}>
-          Loading planets...
-        </p>
-      )}
-
       <div className="results-container">
-        {filteredPlanets.map((planet) => (
-          <div key={planet.name} className="result-card">
+        {filtered.map(p => (
+          <div key={p.name} className="result-card">
+            <h3>{p.name}</h3>
 
-            <h3>{planet.name}</h3>
-
-            <button onClick={() => toggleExpand(planet.name)}>
-              {expanded === planet.name
-                ? "Hide"
-                : "View details"}
+            <button onClick={() => setSelected(p)}>
+              View Details
             </button>
 
-            {expanded === planet.name && (
-              <div style={{ marginTop: "15px" }}>
-                <p><strong>Climate:</strong> {planet.climate}</p>
-                <p><strong>Terrain:</strong> {planet.terrain}</p>
-                <p><strong>Population:</strong> {planet.population}</p>
-                <p><strong>Gravity:</strong> {planet.gravity}</p>
-                <p><strong>Diameter:</strong> {planet.diameter}</p>
-              </div>
-            )}
-
+            <button onClick={() =>
+              toggleFavorite({ id: p.name, type: "planet", data: p })
+            }>
+              {isFavorite(p.name, "planet") ? "★" : "☆"}
+            </button>
           </div>
         ))}
       </div>
+
+      <Modal isOpen={!!selected} onClose={() => setSelected(null)}>
+        {selected && (
+          <>
+            <h2>{selected.name}</h2>
+            <p>
+              {selected.name} has a climate described as {selected.climate},
+              terrain mainly composed of {selected.terrain}, and a population
+              of {selected.population}. The planet diameter is
+              {" "} {selected.diameter} kilometers.
+            </p>
+          </>
+        )}
+      </Modal>
     </div>
   );
 }
