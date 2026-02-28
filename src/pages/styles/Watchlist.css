@@ -1,0 +1,27 @@
+.watchlist-container {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.watch-column {
+  background: #1a1a2e;
+  padding: 20px;
+  border-radius: 12px;
+  width: 280px;
+  min-height: 350px;
+}
+
+.watch-card {
+  background: #292945;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  cursor: grab;
+  transition: 0.2s;
+}
+
+.watch-card:hover {
+  background: #3a3a60;
+}
