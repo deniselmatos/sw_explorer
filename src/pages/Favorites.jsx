@@ -61,13 +61,13 @@ function Favorites() {
   return (
     <div className="favorites-page">
       
-      {/* ================= FAVORITOS ================= */}
-      <h1>⭐ Favoritos</h1>
+     {/* ================= FAVORITES ================= */}
+      <h1>⭐ Favorites</h1>
 
-      <h2>Filmes Favoritos</h2>
+      <h2>Favorite Movies</h2>
 
       {favoriteFilms.length === 0 ? (
-        <p>Nenhum filme favoritado ainda.</p>
+        <p>No favorite movies yet.</p>
       ) : (
         <div className="favorite-grid">
           {favoriteFilms.map(f => (
@@ -83,7 +83,7 @@ function Favorites() {
       {/* ================= WATCHLIST ================= */}
       <h1 className="watchlist-title">🎬 Film Watchlist</h1>
 
-      {/* ORDEM */}
+      {/* ORDER */}
       <div className="order-filter">
         <label>
           <input
@@ -92,7 +92,7 @@ function Favorites() {
             checked={orderType === "release"}
             onChange={() => setOrderType("release")}
           />
-          Ordem de Lançamento
+          Release Order
         </label>
 
         <label>
@@ -102,7 +102,7 @@ function Favorites() {
             checked={orderType === "chronological"}
             onChange={() => setOrderType("chronological")}
           />
-          Ordem Cronológica
+          Chronological Order
         </label>
       </div>
 
@@ -120,10 +120,10 @@ function Favorites() {
               <WatchColumn
                 title={
                   column === "toWatch"
-                    ? "A Assistir"
+                    ? "To Watch"
                     : column === "watching"
-                    ? "Assistindo"
-                    : "Assistido"
+                    ? "Watching"
+                    : "Watched"
                 }
                 type={column}
                 films={getSortedFilms(watchlist[column])}
@@ -133,8 +133,8 @@ function Favorites() {
         </div>
       </DndContext>
 
-    </div>
-  );
-}
+      </div>
+      );
+      }
 
-export default Favorites;
+      export default Favorites;
