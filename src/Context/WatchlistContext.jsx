@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { getFilms } from "../services/api";
 
 const WatchlistContext = createContext();
 
@@ -11,13 +12,35 @@ export function WatchlistProvider({ children }) {
     watched: []
   });
 
-  // Carrega filmes só uma vez
   useEffect(() => {
-    async function fetchFilms() {
-      const res = await fetch("https://swapi.dev/api/films/");
-      const data = await res.json();
+    async function loadFilms() {
+      const swapiFilms = await getFilms();
 
-      const films = data.results.map(f => ({
+      const sequelFilms = [
+        {
+          title: "Star Wars: The Force Awakens",
+          episode_id: 7,
+          director: "J.J. Abrams",
+          producer: "Kathleen Kennedy",
+          release_date: "2015-12-18"
+        },
+        {
+          title: "Star Wars: The Last Jedi",
+          episode_id: 8,
+          director: "Rian Johnson",
+          producer: "Kathleen Kennedy",
+          release_date: "2017-12-15"
+        },
+        {
+          title: "Star Wars: The Rise of Skywalker",
+          episode_id: 9,
+          director: "J.J. Abrams",
+          producer: "Kathleen Kennedy",
+          release_date: "2019-12-20"
+        }
+      ];
+
+      const allFilms = [...swapiFilms, ...sequelFilms].map(f => ({
         id: f.episode_id,
         title: f.title,
         release_date: f.release_date,
@@ -25,16 +48,15 @@ export function WatchlistProvider({ children }) {
       }));
 
       setWatchlist({
-        toWatch: films,
+        toWatch: allFilms,
         watching: [],
         watched: []
       });
     }
 
-    fetchFilms();
+    loadFilms();
   }, []);
 
-  // Função que retorna filmes ordenados
   function getSortedFilms(films) {
     const sorted = [...films];
 

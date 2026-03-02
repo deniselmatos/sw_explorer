@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useFavorites } from "../context/FavoritesContext";
 import { useWatchlist } from "../context/WatchlistContext";
 import {
@@ -6,14 +7,13 @@ import {
 } from "@dnd-kit/core";
 import {
   SortableContext,
-  verticalListSortingStrategy
+  rectSortingStrategy
 } from "@dnd-kit/sortable";
 import WatchColumn from "../components/WatchColumn";
 import "./styles/favorites.css";
 
 function Favorites() {
   const { favorites } = useFavorites();
-
   const {
     watchlist,
     setWatchlist,
@@ -22,10 +22,15 @@ function Favorites() {
     getSortedFilms
   } = useWatchlist();
 
-  const favoriteFilms = favorites.filter(
-    item => item.type === "film"
-  );
+  const [filterType, setFilterType] = useState("all");
 
+  // ================= FILTRO FAVORITOS =================
+  const filteredFavorites =
+    filterType === "all"
+      ? favorites
+      : favorites.filter(f => f.type === filterType);
+
+  // ================= DRAG =================
   function handleDragEnd(event) {
     const { active, over } = event;
     if (!over) return;
@@ -42,7 +47,6 @@ function Favorites() {
           );
 
     if (!sourceColumn || !targetColumn) return;
-
     if (sourceColumn === targetColumn) return;
 
     const movingFilm = watchlist[sourceColumn].find(
@@ -60,30 +64,39 @@ function Favorites() {
 
   return (
     <div className="favorites-page">
-      
-     {/* ================= FAVORITES ================= */}
+
+      {/* ================= FAVORITOS ================= */}
       <h1>⭐ Favorites</h1>
 
-      <h2>Favorite Movies</h2>
+      <div className="favorite-filters">
+        {["all", "character", "planet", "starship", "species", "film"].map(type => (
+          <button
+            key={type}
+            className={filterType === type ? "active" : ""}
+            onClick={() => setFilterType(type)}
+          >
+            {type.toUpperCase()}
+          </button>
+        ))}
+      </div>
 
-      {favoriteFilms.length === 0 ? (
-        <p>No favorite movies yet.</p>
-      ) : (
-        <div className="favorite-grid">
-          {favoriteFilms.map(f => (
-            <div key={f.id} className="favorite-card">
-              {f.data?.title || f.title}
+      <div className="favorite-grid">
+        {filteredFavorites.length === 0 ? (
+          <p>Nenhum favorito encontrado.</p>
+        ) : (
+          filteredFavorites.map(item => (
+            <div key={item.id} className="favorite-card">
+              {item.data?.name || item.data?.title}
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
 
       <hr />
 
-      {/* ================= WATCHLIST ================= */}
-      <h1 className="watchlist-title">🎬 Film Watchlist</h1>
+      {/* ================= CHECKLIST ================= */}
+      <h1>🎬 Film Checklist</h1>
 
-      {/* ORDER */}
       <div className="order-filter">
         <label>
           <input
@@ -110,12 +123,12 @@ function Favorites() {
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
-        <div className="watchlist-container">
+        <div className="watchlist-grid">
           {Object.keys(watchlist).map(column => (
             <SortableContext
               key={column}
               items={watchlist[column].map(f => f.id)}
-              strategy={verticalListSortingStrategy}
+              strategy={rectSortingStrategy}
             >
               <WatchColumn
                 title={
@@ -133,8 +146,8 @@ function Favorites() {
         </div>
       </DndContext>
 
-      </div>
-      );
-      }
+    </div>
+  );
+}
 
-      export default Favorites;
+export default Favorites;
