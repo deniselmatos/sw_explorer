@@ -1,148 +1,142 @@
 import { useState } from "react";
-import { useFavorites } from "../context/FavoritesContext";
-import { useWatchlist } from "../context/WatchlistContext";
-
-import {
-  DndContext,
-  closestCenter
-} from "@dnd-kit/core";
-
-import WatchColumn from "../components/WatchColumn";
-
-import "./styles/Favorites.css";
+import { useApp } from "../context/AppContext";
 
 function Favorites() {
-  const { favorites } = useFavorites();
   const {
-    watchlist,
-    setWatchlist,
+    favorites,
+    films,
     orderType,
     setOrderType,
-    getSortedFilms
-  } = useWatchlist();
+    moveFilm
+  } = useApp();
 
-  const [activeTab, setActiveTab] = useState("characters");
+  const [filter, setFilter] = useState("all");
+  const [blockedId, setBlockedId] = useState(null);
 
-  function handleDragEnd(event) {
-    const { active, over } = event;
-    if (!over) return;
+  const filteredFavorites =
+    filter === "all"
+      ? favorites
+      : favorites.filter((f) => f.type === filter);
 
-    let sourceColumn = null;
-    let targetColumn = null;
-
-    // Descobre coluna origem
-    Object.keys(watchlist).forEach(column => {
-      if (watchlist[column].some(f => f.id === active.id)) {
-        sourceColumn = column;
-      }
-    });
-
-    // Se soltou direto na coluna
-    if (watchlist[over.id]) {
-      targetColumn = over.id;
-    } else {
-      // Se soltou em cima de outro card
-      Object.keys(watchlist).forEach(column => {
-        if (watchlist[column].some(f => f.id === over.id)) {
-          targetColumn = column;
-        }
-      });
+  const sortedFilms = [...films].sort((a, b) => {
+    if (orderType === "release") {
+      return new Date(a.release_date) - new Date(b.release_date);
     }
+    return a.episode_id - b.episode_id;
+  });
 
-    if (!sourceColumn || !targetColumn) return;
-    if (sourceColumn === targetColumn) return;
-
-    const film = watchlist[sourceColumn].find(f => f.id === active.id);
-
-    setWatchlist(prev => ({
-      ...prev,
-      [sourceColumn]: prev[sourceColumn].filter(f => f.id !== active.id),
-      [targetColumn]: [...prev[targetColumn], film]
-    }));
-  }
-
-  const filteredFavorites = favorites.filter(
-    fav => fav.type === activeTab
+  const toWatch = sortedFilms.filter(
+    (f) => f.status[orderType] === "toWatch"
   );
 
+  const watching = sortedFilms.filter(
+    (f) => f.status[orderType] === "watching"
+  );
+
+  const watched = sortedFilms.filter(
+    (f) => f.status[orderType] === "watched"
+  );
+
+  function handleMove(id, status) {
+    const allowed = moveFilm(id, status);
+    setBlockedId(allowed ? null : id);
+  }
+
   return (
-    <div className="favorites-page">
-      <h1>Favorites & Watchlist</h1>
+    <div>
+      <h1>Favorites</h1>
 
-      {/* FAVORITES */}
-      <div className="favorites-section">
-        <div className="favorite-filters">
-          <button onClick={() => setActiveTab("characters")}>Characters</button>
-          <button onClick={() => setActiveTab("planets")}>Planets</button>
-          <button onClick={() => setActiveTab("starships")}>Starships</button>
-          <button onClick={() => setActiveTab("species")}>Species</button>
-          <button onClick={() => setActiveTab("film")}>Films</button>
-        </div>
-
-        <div className="favorite-grid">
-          {filteredFavorites.length === 0 && (
-            <p>No favorites added.</p>
-          )}
-
-          {filteredFavorites.map(fav => (
-            <div key={fav.id} className="favorite-card">
-              <h3>{fav.data?.name || fav.data?.title}</h3>
-            </div>
-          ))}
-        </div>
+      <div style={{ marginBottom: 10 }}>
+        <button onClick={() => setFilter("all")}>All</button>
+        <button onClick={() => setFilter("film")}>Films</button>
+        <button onClick={() => setFilter("character")}>Characters</button>
+        <button onClick={() => setFilter("planet")}>Planets</button>
+        <button onClick={() => setFilter("species")}>Species</button>
+        <button onClick={() => setFilter("starship")}>Starships</button>
       </div>
 
-      {/* CHECKLIST */}
-      <div>
-        <h2>Movie Checklist</h2>
-
-        <div className="order-filter">
-          <label>
-            <input
-              type="radio"
-              value="release"
-              checked={orderType === "release"}
-              onChange={() => setOrderType("release")}
-            />
-            Release Order
-          </label>
-
-          <label>
-            <input
-              type="radio"
-              value="chronological"
-              checked={orderType === "chronological"}
-              onChange={() => setOrderType("chronological")}
-            />
-            Chronological Order
-          </label>
-        </div>
-
-        <DndContext
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <div className="watchlist-grid">
-            <WatchColumn
-              id="toWatch"
-              title="To Watch"
-              films={getSortedFilms(watchlist.toWatch)}
-            />
-
-            <WatchColumn
-              id="watching"
-              title="Watching"
-              films={getSortedFilms(watchlist.watching)}
-            />
-
-            <WatchColumn
-              id="watched"
-              title="Watched"
-              films={getSortedFilms(watchlist.watched)}
-            />
+      {favorites.length === 0 ? (
+        <p>You don't have any favorites yet.</p>
+      ) : filteredFavorites.length === 0 ? (
+        <p>No favorites in this category.</p>
+      ) : (
+        filteredFavorites.map((fav) => (
+          <div key={fav.id} style={{ marginBottom: 8 }}>
+            <p>{fav.data.name || fav.data.title}</p>
           </div>
-        </DndContext>
+        ))
+      )}
+
+      <hr />
+
+      <h1>Movie Checklist</h1>
+
+      <div style={{ marginBottom: 10 }}>
+        <label>
+          <input
+            type="radio"
+            value="release"
+            checked={orderType === "release"}
+            onChange={(e) => setOrderType(e.target.value)}
+          />
+          Release Order
+        </label>
+
+        <label style={{ marginLeft: 15 }}>
+          <input
+            type="radio"
+            value="chronological"
+            checked={orderType === "chronological"}
+            onChange={(e) => setOrderType(e.target.value)}
+          />
+          Chronological Order
+        </label>
       </div>
+
+      <h2>To Watch</h2>
+      {toWatch.map((film) => (
+        <div key={film.id} style={{ marginBottom: 10 }}>
+          <p>{film.title}</p>
+
+          <button onClick={() => handleMove(film.id, "watching")}>
+            Start
+          </button>
+
+          {blockedId === film.id && (
+            <p>You must watch the previous movie first.</p>
+          )}
+        </div>
+      ))}
+
+      <h2>Watching</h2>
+      {watching.map((film) => (
+        <div key={film.id} style={{ marginBottom: 10 }}>
+          <p>{film.title}</p>
+
+          <button onClick={() => handleMove(film.id, "toWatch")}>
+            Back
+          </button>
+
+          <button onClick={() => handleMove(film.id, "watched")}>
+            Finish
+          </button>
+
+          {blockedId === film.id && (
+            <p>You must watch the previous movie first.</p>
+          )}
+        </div>
+      ))}
+
+      <h2>Watched</h2>
+      {watched.map((film) => (
+        <div key={film.id} style={{ marginBottom: 10 }}>
+          <p>{film.title}</p>
+
+          <button onClick={() => handleMove(film.id, "watching")}>
+            Rewatch
+          </button>
+        </div>
+      ))}
     </div>
   );
 }

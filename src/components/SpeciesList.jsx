@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getSpecies } from "../services/api";
-import { useFavorites } from "../context/FavoritesContext";
+import { useApp } from "../context/AppContext";
 import Modal from "./Modal";
 
 function SpeciesList() {
@@ -9,7 +9,7 @@ function SpeciesList() {
   const [classification, setClassification] = useState("all");
   const [selected, setSelected] = useState(null);
 
-  const { toggleFavorite, isFavorite } = useFavorites();
+  const { toggleFavorite, isFavorite } = useApp();
 
   useEffect(() => {
     async function loadSpecies() {
@@ -53,32 +53,35 @@ function SpeciesList() {
 
       <div className="grid">
         {filtered.map((item) => (
-          <div key={item.name} className="card">
+          <div key={item.url} className="card">
             <h3>{item.name}</h3>
 
             <button onClick={() => setSelected(item)}>
               View Details
             </button>
 
-            <button
-              onClick={() =>
-                toggleFavorite({ id: item.name, type: "species", data: item })
-              }
-            >
-              Favorites {isFavorite(item.name, "species") ? "★" : "☆"}
+            <button onClick={() => toggleFavorite(item, "species")}>
+              Favorite {isFavorite(item, "species") ? "★" : "☆"}
             </button>
           </div>
         ))}
       </div>
 
       {selected && (
-        <Modal onClose={() => setSelected(null)}>
-          <h2>{selected.name}</h2>
-          <p>
-            {selected.name} is classified as {selected.classification} and has an average lifespan of {selected.average_lifespan}. 
-            They typically speak {selected.language} and have an average height of {selected.average_height} centimeters.
-          </p>
-        </Modal>
+      <Modal onClose={() => setSelected(null)}>
+        <h2>{selected.name}</h2>
+        <p>
+          {selected.name} is classified as {selected.classification} and has an
+          average lifespan of{" "}
+          {selected.average_lifespan !== "unknown"
+            ? Number(selected.average_lifespan).toLocaleString()
+            : "unknown"} years. They typically speak {selected.language} and have
+          an average height of{" "}
+          {selected.average_height !== "unknown"
+            ? Number(selected.average_height).toLocaleString()
+            : "unknown"} centimeters.
+        </p>
+      </Modal>
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getPlanets } from "../services/api";
-import { useFavorites } from "../context/FavoritesContext";
+import { useApp } from "../context/AppContext";
 import Modal from "./Modal";
 
 function PlanetList() {
@@ -9,7 +9,7 @@ function PlanetList() {
   const [climate, setClimate] = useState("all");
   const [selected, setSelected] = useState(null);
 
-  const { toggleFavorite, isFavorite } = useFavorites();
+  const { toggleFavorite, isFavorite } = useApp();
 
   useEffect(() => {
     async function loadPlanets() {
@@ -50,36 +50,34 @@ function PlanetList() {
 
       <div className="grid">
         {filtered.map((planet) => (
-          <div key={planet.name} className="card">
+          <div key={planet.url} className="card">
             <h3>{planet.name}</h3>
 
             <button onClick={() => setSelected(planet)}>
               View Details
             </button>
 
-            <button
-              onClick={() =>
-                toggleFavorite({ id: planet.name, type: "planet", data: planet })
-              }
-            >
-              Favorites {isFavorite(planet.name, "planet") ? "★" : "☆"}
+            <button onClick={() => toggleFavorite(planet, "planet")}>
+              Favorite {isFavorite(planet, "planet") ? "★" : "☆"}
             </button>
           </div>
         ))}
       </div>
 
       {selected && (
-        <Modal onClose={() => setSelected(null)}>
-          <h2>{selected.name}</h2>
-          <p>
-            {selected.name} has a {selected.climate} climate and terrain mainly composed of {selected.terrain}. 
-            It has a population of {selected.population !== "unknown"
-              ? Number(selected.population).toLocaleString()
-              : "unknown"} inhabitants and a diameter of {selected.diameter !== "unknown"
-              ? Number(selected.diameter).toLocaleString()
-              : "unknown"} km.
-          </p>
-        </Modal>
+      <Modal onClose={() => setSelected(null)}>
+        <h2>{selected.name}</h2>
+        <p>
+          {selected.name} is a planet with a {selected.climate} climate and terrain
+          primarily composed of {selected.terrain}. It has a population of{" "}
+          {selected.population !== "unknown"
+            ? Number(selected.population).toLocaleString()
+            : "unknown"} inhabitants and a diameter of{" "}
+          {selected.diameter !== "unknown"
+            ? Number(selected.diameter).toLocaleString()
+            : "unknown"} kilometers.
+        </p>
+      </Modal>
       )}
     </div>
   );

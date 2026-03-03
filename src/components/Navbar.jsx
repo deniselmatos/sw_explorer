@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import "./styles/navbar.css";
+//import "./styles/navbar.css";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -15,11 +15,17 @@ function Navbar() {
           Home
         </button>
 
-        <button className="navbar-button" onClick={() => navigate("/explore")}>
+        <button
+          className="navbar-button"
+          onClick={() => navigate("/explore")}
+        >
           Explorer
         </button>
 
-        <button className="navbar-button" onClick={() => navigate("/favorites")}>
+        <button
+          className="navbar-button"
+          onClick={() => navigate("/favorites")}
+        >
           Favorites and Lists
         </button>
       </div>

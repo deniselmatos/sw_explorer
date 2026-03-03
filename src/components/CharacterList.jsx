@@ -21,11 +21,9 @@ function CharacterList() {
       setCharacters(data);
       setFiltered(data);
     }
-
     loadCharacters();
   }, []);
 
-  // Aplicar filtros
   useEffect(() => {
     let result = characters;
 
@@ -42,18 +40,15 @@ function CharacterList() {
     setFiltered(result);
   }, [search, genderFilter, characters]);
 
-  // Buscar planeta e filmes 
   useEffect(() => {
     if (!selected) return;
 
     async function fetchDetails() {
       try {
-        // Buscar planeta natal
         const planetRes = await fetch(selected.homeworld);
         const planetData = await planetRes.json();
         setPlanet(planetData.name);
 
-        // Buscar filmes
         const filmPromises = selected.films.map(url =>
           fetch(url).then(res => res.json())
         );
@@ -98,8 +93,8 @@ function CharacterList() {
               Details
             </button>
 
-            <button onClick={() => toggleFavorite(char, "characters")}>
-              Favorite {isFavorite(char.url) ? "★" : "☆"}
+            <button onClick={() => toggleFavorite(char, "character")}>
+              Favorite {isFavorite(char, "character") ? "★" : "☆"}
             </button>
           </div>
         ))}
@@ -115,9 +110,8 @@ function CharacterList() {
 
           {planet && (
             <p>
-              {selected.name} is a {selected.gender} character born on the planet{" "}
-              {planet}. This character appears in the following films:{" "}
-              {films.map(f => f.title).join(", ")}.
+              {selected.name} is a {selected.gender} character born on {planet}.
+              Appears in: {films.map(f => f.title).join(", ")}.
             </p>
           )}
         </Modal>
