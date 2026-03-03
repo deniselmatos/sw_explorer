@@ -66,7 +66,7 @@ function Favorites() {
     <div className="favorites-page">
 
       {/* ================= FAVORITOS ================= */}
-      <h1>⭐ Favorites</h1>
+      <h1>Favorites</h1>
 
       <div className="favorite-filters">
         {["all", "character", "planet", "starship", "species", "film"].map(type => (
@@ -95,7 +95,7 @@ function Favorites() {
       <hr />
 
       {/* ================= CHECKLIST ================= */}
-      <h1>🎬 Film Checklist</h1>
+      <h1>Film Checklist</h1>
 
       <div className="order-filter">
         <label>
