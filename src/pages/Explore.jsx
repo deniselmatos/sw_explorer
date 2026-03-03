@@ -4,7 +4,7 @@ import PlanetList from "../components/PlanetList";
 import StarshipList from "../components/StarshipList";
 import SpeciesList from "../components/SpeciesList";
 import FilmList from "../components/FilmList";
-import "./styles/favorites.css";
+import "./styles/explore.css";
 
 function Explore() {
   const [activeTab, setActiveTab] = useState("characters");
