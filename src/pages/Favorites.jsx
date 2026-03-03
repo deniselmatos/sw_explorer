@@ -7,13 +7,9 @@ import {
   closestCenter
 } from "@dnd-kit/core";
 
-import {
-  SortableContext,
-  verticalListSortingStrategy
-} from "@dnd-kit/sortable";
-
 import WatchColumn from "../components/WatchColumn";
-import "./styles/favorites.css";
+
+import "./styles/Favorites.css";
 
 function Favorites() {
   const { favorites } = useFavorites();
@@ -31,28 +27,37 @@ function Favorites() {
     const { active, over } = event;
     if (!over) return;
 
-    const sourceColumn =
-      active.data.current?.sortable?.containerId;
+    let sourceColumn = null;
+    let targetColumn = null;
 
-    const targetColumn =
-      over.data.current?.sortable?.containerId;
+    // Descobre coluna origem
+    Object.keys(watchlist).forEach(column => {
+      if (watchlist[column].some(f => f.id === active.id)) {
+        sourceColumn = column;
+      }
+    });
+
+    // Se soltou direto na coluna
+    if (watchlist[over.id]) {
+      targetColumn = over.id;
+    } else {
+      // Se soltou em cima de outro card
+      Object.keys(watchlist).forEach(column => {
+        if (watchlist[column].some(f => f.id === over.id)) {
+          targetColumn = column;
+        }
+      });
+    }
 
     if (!sourceColumn || !targetColumn) return;
-
     if (sourceColumn === targetColumn) return;
 
-    const movingFilm = watchlist[sourceColumn].find(
-      film => film.id === active.id
-    );
-
-    if (!movingFilm) return;
+    const film = watchlist[sourceColumn].find(f => f.id === active.id);
 
     setWatchlist(prev => ({
       ...prev,
-      [sourceColumn]: prev[sourceColumn].filter(
-        film => film.id !== active.id
-      ),
-      [targetColumn]: [...prev[targetColumn], movingFilm]
+      [sourceColumn]: prev[sourceColumn].filter(f => f.id !== active.id),
+      [targetColumn]: [...prev[targetColumn], film]
     }));
   }
 
@@ -62,72 +67,55 @@ function Favorites() {
 
   return (
     <div className="favorites-page">
-      <h1>Favorites & Lists</h1>
+      <h1>Favorites & Watchlist</h1>
 
       {/* FAVORITES */}
-      <div className="favorite-filters">
-        <button
-          className={activeTab === "characters" ? "active" : ""}
-          onClick={() => setActiveTab("characters")}
-        >
-          Characters
-        </button>
+      <div className="favorites-section">
+        <div className="favorite-filters">
+          <button onClick={() => setActiveTab("characters")}>Characters</button>
+          <button onClick={() => setActiveTab("planets")}>Planets</button>
+          <button onClick={() => setActiveTab("starships")}>Starships</button>
+          <button onClick={() => setActiveTab("species")}>Species</button>
+          <button onClick={() => setActiveTab("film")}>Films</button>
+        </div>
 
-        <button
-          className={activeTab === "planets" ? "active" : ""}
-          onClick={() => setActiveTab("planets")}
-        >
-          Planets
-        </button>
+        <div className="favorite-grid">
+          {filteredFavorites.length === 0 && (
+            <p>No favorites added.</p>
+          )}
 
-        <button
-          className={activeTab === "starships" ? "active" : ""}
-          onClick={() => setActiveTab("starships")}
-        >
-          Starships
-        </button>
-
-        <button
-          className={activeTab === "species" ? "active" : ""}
-          onClick={() => setActiveTab("species")}
-        >
-          Species
-        </button>
-
-        <button
-          className={activeTab === "film" ? "active" : ""}
-          onClick={() => setActiveTab("film")}
-        >
-          Films
-        </button>
+          {filteredFavorites.map(fav => (
+            <div key={fav.id} className="favorite-card">
+              <h3>{fav.data?.name || fav.data?.title}</h3>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="favorite-grid">
-        {filteredFavorites.length === 0 && (
-          <p>No favorites added.</p>
-        )}
-
-        {filteredFavorites.map(fav => (
-          <div key={fav.id} className="favorite-card">
-            <h3>{fav.data?.name || fav.data?.title}</h3>
-          </div>
-        ))}
-      </div>
-
-      {/* WATCHLIST */}
+      {/* CHECKLIST */}
       <div>
         <h2>Movie Checklist</h2>
 
         <div className="order-filter">
-          <select
-            value={orderType}
-            onChange={e => setOrderType(e.target.value)}
-          >
-            <option value="release">Release Order</option>
-            <option value="chronological">
-              Chronological Order
-            </option>
-          </select>
+          <label>
+            <input
+              type="radio"
+              value="release"
+              checked={orderType === "release"}
+              onChange={() => setOrderType("release")}
+            />
+            Release Order
+          </label>
+
+          <label>
+            <input
+              type="radio"
+              value="chronological"
+              checked={orderType === "chronological"}
+              onChange={() => setOrderType("chronological")}
+            />
+            Chronological Order
+          </label>
         </div>
 
         <DndContext
@@ -135,26 +123,23 @@ function Favorites() {
           onDragEnd={handleDragEnd}
         >
           <div className="watchlist-grid">
-            {Object.keys(watchlist).map(column => (
-              <SortableContext
-                key={column}
-                id={column}
-                items={watchlist[column].map(f => f.id)}
-                strategy={verticalListSortingStrategy}
-              >
-                <WatchColumn
-                  id={column}
-                  title={
-                    column === "toWatch"
-                      ? "To Watch"
-                      : column === "watching"
-                      ? "Watching"
-                      : "Watched"
-                  }
-                  films={getSortedFilms(watchlist[column])}
-                />
-              </SortableContext>
-            ))}
+            <WatchColumn
+              id="toWatch"
+              title="To Watch"
+              films={getSortedFilms(watchlist.toWatch)}
+            />
+
+            <WatchColumn
+              id="watching"
+              title="Watching"
+              films={getSortedFilms(watchlist.watching)}
+            />
+
+            <WatchColumn
+              id="watched"
+              title="Watched"
+              films={getSortedFilms(watchlist.watched)}
+            />
           </div>
         </DndContext>
       </div>

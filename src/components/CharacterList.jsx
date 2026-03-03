@@ -1,123 +1,127 @@
 import { useEffect, useState } from "react";
-import { useFavorites } from "../context/FavoritesContext";
-import { getCharacters } from "../services/api";
 import Modal from "./Modal";
+import { useApp } from "../context/AppContext";
+import { getCharacters } from "../services/api";
 
 function CharacterList() {
   const [characters, setCharacters] = useState([]);
-  const [planetNames, setPlanetNames] = useState({});
-  const [search, setSearch] = useState("");
-  const [gender, setGender] = useState("all");
-  const [planetFilter, setPlanetFilter] = useState("all");
+  const [filtered, setFiltered] = useState([]);
   const [selected, setSelected] = useState(null);
+  const [search, setSearch] = useState("");
+  const [genderFilter, setGenderFilter] = useState("all");
+
+  const [planet, setPlanet] = useState(null);
   const [films, setFilms] = useState([]);
 
-  const { toggleFavorite, isFavorite } = useFavorites();
+  const { toggleFavorite, isFavorite } = useApp();
 
- useEffect(() => {
-  async function fetchData() {
-    const all = await getCharacters();
-    setCharacters(all);
+  useEffect(() => {
+    async function loadCharacters() {
+      const data = await getCharacters();
+      setCharacters(data);
+      setFiltered(data);
+    }
 
-    const uniquePlanets = [...new Set(all.map(c => c.homeworld))];
-    const planetMap = {};
+    loadCharacters();
+  }, []);
 
-    await Promise.all(
-      uniquePlanets.map(async (url) => {
-        const res = await fetch(url);
-        const data = await res.json();
-        planetMap[url] = data.name;
-      })
-    );
+  // Aplicar filtros
+  useEffect(() => {
+    let result = characters;
 
-    setPlanetNames(planetMap);
-  }
+    if (search) {
+      result = result.filter(char =>
+        char.name.toLowerCase().includes(search.toLowerCase())
+      );
+    }
 
-  fetchData();
-}, []);
+    if (genderFilter !== "all") {
+      result = result.filter(char => char.gender === genderFilter);
+    }
 
-  async function openModal(character) {
-    setSelected(character);
+    setFiltered(result);
+  }, [search, genderFilter, characters]);
 
-    const filmsData = await Promise.all(
-      character.films.map(url => fetch(url).then(r => r.json()))
-    );
+  // Buscar planeta e filmes 
+  useEffect(() => {
+    if (!selected) return;
 
-    setFilms(filmsData);
-  }
+    async function fetchDetails() {
+      try {
+        // Buscar planeta natal
+        const planetRes = await fetch(selected.homeworld);
+        const planetData = await planetRes.json();
+        setPlanet(planetData.name);
 
-  const filtered = characters.filter(c => {
-    const matchSearch =
-      c.name.toLowerCase().includes(search.toLowerCase());
+        // Buscar filmes
+        const filmPromises = selected.films.map(url =>
+          fetch(url).then(res => res.json())
+        );
 
-    const matchGender =
-      gender === "all" || c.gender === gender;
+        const filmsData = await Promise.all(filmPromises);
+        setFilms(filmsData);
+      } catch (error) {
+        console.error("Error loading details:", error);
+      }
+    }
 
-    const matchPlanet =
-      planetFilter === "all" ||
-      planetNames[c.homeworld] === planetFilter;
-
-    return matchSearch && matchGender && matchPlanet;
-  });
-
-  const uniquePlanets = Object.values(planetNames);
+    fetchDetails();
+  }, [selected]);
 
   return (
     <div>
-      <h2 style={{ textAlign: "center" }}>Characters</h2>
+      <h2>Characters</h2>
 
-      <div style={{ textAlign: "center", marginBottom: 20 }}>
-        <input
-          placeholder="Search character..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
+      <input
+        type="text"
+        placeholder="Search character..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
 
-        <select value={gender} onChange={e => setGender(e.target.value)}>
-          <option value="all">All Genders</option>
-          {[...new Set(characters.map(c => c.gender))].map(g =>
-            <option key={g}>{g}</option>
-          )}
-        </select>
+      <select
+        value={genderFilter}
+        onChange={(e) => setGenderFilter(e.target.value)}
+      >
+        <option value="all">All Genders</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+        <option value="n/a">N/A</option>
+      </select>
 
-        <select value={planetFilter} onChange={e => setPlanetFilter(e.target.value)}>
-          <option value="all">All Planets</option>
-          {uniquePlanets.map((p,i) =>
-            <option key={i}>{p}</option>
-          )}
-        </select>
-      </div>
+      <div className="grid">
+        {filtered.map((char) => (
+          <div key={char.url} className="card">
+            <h3>{char.name}</h3>
 
-      <div className="results-container">
-        {filtered.map(c => (
-          <div key={c.name} className="result-card">
-            <h3>{c.name}</h3>
-
-            <button onClick={() => openModal(c)}>
-              View Details
+            <button onClick={() => setSelected(char)}>
+              Details
             </button>
 
-            <button onClick={() =>
-              toggleFavorite({ id: c.name, type: "character", data: c })
-            }>
-              {isFavorite(c.name, "character") ? "★" : "☆"}
+            <button onClick={() => toggleFavorite(char, "characters")}>
+              Favorite {isFavorite(char.url) ? "★" : "☆"}
             </button>
           </div>
         ))}
       </div>
 
-      <Modal isOpen={!!selected} onClose={() => setSelected(null)}>
-        {selected && (
-          <>
-            <h2>{selected.name}</h2>
+      {selected && (
+        <Modal onClose={() => {
+          setSelected(null);
+          setPlanet(null);
+          setFilms([]);
+        }}>
+          <h3>{selected.name}</h3>
+
+          {planet && (
             <p>
-              {selected.name} is a {selected.gender} character from the planet
-              {" "} {planetNames[selected.homeworld]}.
-              This character appears in {films.map(f => f.title).join(", ")}.
+              {selected.name} is a {selected.gender} character born on the planet{" "}
+              {planet}. This character appears in the following films:{" "}
+              {films.map(f => f.title).join(", ")}.
             </p>
-          </>
-        )}
-      </Modal>
+          )}
+        </Modal>
+      )}
     </div>
   );
 }

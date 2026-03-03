@@ -1,19 +1,36 @@
 import { useState } from "react";
+
 import CharacterList from "../components/CharacterList";
 import PlanetList from "../components/PlanetList";
 import StarshipList from "../components/StarshipList";
 import SpeciesList from "../components/SpeciesList";
 import FilmList from "../components/FilmList";
-import "./styles/explore.css";
 
 function Explore() {
   const [activeTab, setActiveTab] = useState("characters");
 
+  function renderContent() {
+    switch (activeTab) {
+      case "characters":
+        return <CharacterList />;
+      case "planets":
+        return <PlanetList />;
+      case "starships":
+        return <StarshipList />;
+      case "species":
+        return <SpeciesList />;
+      case "films":
+        return <FilmList />;
+      default:
+        return null;
+    }
+  }
+
   return (
-    <div className="favorites-page">
+    <div className="explore-page">
       <h1>Explore the Star Wars Universe</h1>
 
-      <div className="favorites-tabs">
+      <div className="tabs">
         <button
           className={activeTab === "characters" ? "active" : ""}
           onClick={() => setActiveTab("characters")}
@@ -50,12 +67,8 @@ function Explore() {
         </button>
       </div>
 
-      <div className="favorites-grid">
-        {activeTab === "characters" && <CharacterList />}
-        {activeTab === "planets" && <PlanetList />}
-        {activeTab === "starships" && <StarshipList />}
-        {activeTab === "species" && <SpeciesList />}
-        {activeTab === "films" && <FilmList />}
+      <div className="explore-content">
+        {renderContent()}
       </div>
     </div>
   );

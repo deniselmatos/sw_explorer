@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getPlanets } from "../services/api";
-import Modal from "./Modal";
 import { useFavorites } from "../context/FavoritesContext";
+import Modal from "./Modal";
 
 function PlanetList() {
   const [planets, setPlanets] = useState([]);
@@ -12,71 +12,75 @@ function PlanetList() {
   const { toggleFavorite, isFavorite } = useFavorites();
 
   useEffect(() => {
-    getPlanets().then(setPlanets);
+    async function loadPlanets() {
+      const data = await getPlanets();
+      setPlanets(data);
+    }
+    loadPlanets();
   }, []);
-
-  const filtered = planets.filter(p => {
-    const matchSearch =
-      p.name.toLowerCase().includes(search.toLowerCase());
-
-    const matchClimate =
-      climate === "all" || p.climate === climate;
-
-    return matchSearch && matchClimate;
-  });
 
   const uniqueClimates = [...new Set(planets.map(p => p.climate))];
 
+  const filtered = planets.filter(p => {
+    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
+    const matchClimate = climate === "all" || p.climate === climate;
+    return matchSearch && matchClimate;
+  });
+
   return (
     <div>
-      <h2 style={{ textAlign: "center" }}>Planets</h2>
+      <h2>Planets</h2>
 
-      <div style={{ textAlign: "center", marginBottom: 20 }}>
-        <input
-          placeholder="Search planet..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
+      <input
+        type="text"
+        placeholder="Search planet..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
 
-        <select value={climate} onChange={e => setClimate(e.target.value)}>
-          <option value="all">All Climates</option>
-          {uniqueClimates.map((c,i) =>
-            <option key={i}>{c}</option>
-          )}
-        </select>
-      </div>
+      <select
+        value={climate}
+        onChange={(e) => setClimate(e.target.value)}
+      >
+        <option value="all">All Climates</option>
+        {uniqueClimates.map((c, i) => (
+          <option key={i}>{c}</option>
+        ))}
+      </select>
 
-      <div className="results-container">
-        {filtered.map(p => (
-          <div key={p.name} className="result-card">
-            <h3>{p.name}</h3>
+      <div className="grid">
+        {filtered.map((planet) => (
+          <div key={planet.name} className="card">
+            <h3>{planet.name}</h3>
 
-            <button onClick={() => setSelected(p)}>
+            <button onClick={() => setSelected(planet)}>
               View Details
             </button>
 
-            <button onClick={() =>
-              toggleFavorite({ id: p.name, type: "planet", data: p })
-            }>
-              {isFavorite(p.name, "planet") ? "★" : "☆"}
+            <button
+              onClick={() =>
+                toggleFavorite({ id: planet.name, type: "planet", data: planet })
+              }
+            >
+              Favorites {isFavorite(planet.name, "planet") ? "★" : "☆"}
             </button>
           </div>
         ))}
       </div>
 
-      <Modal isOpen={!!selected} onClose={() => setSelected(null)}>
-        {selected && (
-          <>
-            <h2>{selected.name}</h2>
-            <p>
-              {selected.name} has a climate described as {selected.climate},
-              terrain mainly composed of {selected.terrain}, and a population
-              of {selected.population}. The planet diameter is
-              {" "} {selected.diameter} kilometers.
-            </p>
-          </>
-        )}
-      </Modal>
+      {selected && (
+        <Modal onClose={() => setSelected(null)}>
+          <h2>{selected.name}</h2>
+          <p>
+            {selected.name} has a {selected.climate} climate and terrain mainly composed of {selected.terrain}. 
+            It has a population of {selected.population !== "unknown"
+              ? Number(selected.population).toLocaleString()
+              : "unknown"} inhabitants and a diameter of {selected.diameter !== "unknown"
+              ? Number(selected.diameter).toLocaleString()
+              : "unknown"} km.
+          </p>
+        </Modal>
+      )}
     </div>
   );
 }
