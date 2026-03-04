@@ -2,61 +2,63 @@ import { useEffect, useState } from "react";
 import Modal from "./Modal";
 import { useApp } from "../context/AppContext";
 import { getCharacters } from "../services/api";
+import { getWikiData } from "../services/wikiService";
+import placeholder from "/assets/placeholder.png";
 
 function CharacterList() {
+  const { toggleFavorite, isFavorite } = useApp();
+
   const [characters, setCharacters] = useState([]);
-  const [filtered, setFiltered] = useState([]);
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState("");
   const [genderFilter, setGenderFilter] = useState("all");
 
-  const [planet, setPlanet] = useState(null);
+  const [planet, setPlanet] = useState("");
   const [films, setFilms] = useState([]);
-
-  const { toggleFavorite, isFavorite } = useApp();
+  const [description, setDescription] = useState("");
+  const [image, setImage] = useState("");
 
   useEffect(() => {
-    async function loadCharacters() {
-      const data = await getCharacters();
-      setCharacters(data);
-      setFiltered(data);
-    }
-    loadCharacters();
+    getCharacters().then(setCharacters);
   }, []);
 
-  useEffect(() => {
-    let result = characters;
+  const filtered = characters.filter((char) => {
+    const matchesSearch = char.name
+      .toLowerCase()
+      .includes(search.toLowerCase());
 
-    if (search) {
-      result = result.filter(char =>
-        char.name.toLowerCase().includes(search.toLowerCase())
-      );
-    }
+    const matchesGender =
+      genderFilter === "all" || char.gender === genderFilter;
 
-    if (genderFilter !== "all") {
-      result = result.filter(char => char.gender === genderFilter);
-    }
-
-    setFiltered(result);
-  }, [search, genderFilter, characters]);
+    return matchesSearch && matchesGender;
+  });
 
   useEffect(() => {
     if (!selected) return;
 
     async function fetchDetails() {
       try {
+        setDescription("");
+        setImage("");
+
+        // Planeta
         const planetRes = await fetch(selected.homeworld);
         const planetData = await planetRes.json();
         setPlanet(planetData.name);
 
-        const filmPromises = selected.films.map(url =>
-          fetch(url).then(res => res.json())
+        // Filmes
+        const filmsData = await Promise.all(
+          selected.films.map((url) =>
+            fetch(url).then((res) => res.json())
+          )
         );
-
-        const filmsData = await Promise.all(filmPromises);
         setFilms(filmsData);
-      } catch (error) {
-        console.error("Error loading details:", error);
+
+        const wiki = await getWikiData(selected.name);
+        setDescription(wiki.description);
+        setImage(wiki.image);
+      } catch (err) {
+        console.error(err);
       }
     }
 
@@ -101,19 +103,30 @@ function CharacterList() {
       </div>
 
       {selected && (
-        <Modal onClose={() => {
-          setSelected(null);
-          setPlanet(null);
-          setFilms([]);
-        }}>
+        <Modal
+          onClose={() => {
+            setSelected(null);
+            setPlanet("");
+            setFilms([]);
+            setDescription("");
+            setImage("");
+          }}
+        >
           <h3>{selected.name}</h3>
 
-          {planet && (
-            <p>
+          <img
+            src={image || placeholder}
+            alt={selected.name}
+            onError={(e) => (e.target.src = placeholder)}
+            style={{ width: "200px", marginBottom: "10px" }}
+          />
+
+          <p>
               {selected.name} is a {selected.gender} character born on {planet}.
               Appears in: {films.map(f => f.title).join(", ")}.
-            </p>
-          )}
+          </p>
+
+          {description && <p>{description}</p>}
         </Modal>
       )}
     </div>

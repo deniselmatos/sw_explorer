@@ -16,7 +16,9 @@ async function fetchAll(endpoint) {
 }
 
 export async function getCharacters() {
-  return fetchAll("people");
+  const all = await fetchAll("people");
+
+  return all.filter(character => character.films.length > 1);
 }
 
 export async function getPlanets() {
