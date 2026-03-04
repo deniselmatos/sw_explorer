@@ -102,10 +102,8 @@ function Favorites() {
         </button>
       </div>
 
-      {/* USANDO SUA GRID PADRÃO */}
       <div className="grid">
 
-        {/* TO WATCH */}
         <div className="card">
           <h2>To Watch</h2>
 
@@ -126,7 +124,6 @@ function Favorites() {
           ))}
         </div>
 
-        {/* WATCHING */}
         <div className="card">
           <h2>Watching</h2>
 
@@ -145,7 +142,6 @@ function Favorites() {
           ))}
         </div>
 
-        {/* WATCHED */}
         <div className="card">
           <h2>Watched</h2>
 

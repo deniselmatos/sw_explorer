@@ -6,8 +6,11 @@ function Home() {
 
   return (
     <div className="home-container">
-      <h1 className="home-title">STAR WARS</h1>
-
+    <img
+      src="/assets/starwars-logo.png"
+      alt="Star Wars"
+      className="home-logo"
+    />
       <h2 className="home-subtitle">
         "A long time ago in a galaxy far, far away...."
       </h2>
