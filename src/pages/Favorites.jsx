@@ -13,10 +13,18 @@ function Favorites() {
   const [filter, setFilter] = useState("all");
   const [blockedId, setBlockedId] = useState(null);
 
+  /* =========================
+     FAVORITES FILTER
+  ==========================*/
+
   const filteredFavorites =
     filter === "all"
       ? favorites
       : favorites.filter((f) => f.type === filter);
+
+  /* =========================
+     SORT FILMS
+  ==========================*/
 
   const sortedFilms = [...films].sort((a, b) => {
     if (orderType === "release") {
@@ -43,16 +51,20 @@ function Favorites() {
   }
 
   return (
-    <div>
+    <div className="favorites-page">
       <h1>Favorites</h1>
 
-      <div style={{ marginBottom: 10 }}>
-        <button onClick={() => setFilter("all")}>All</button>
-        <button onClick={() => setFilter("film")}>Films</button>
-        <button onClick={() => setFilter("character")}>Characters</button>
-        <button onClick={() => setFilter("planet")}>Planets</button>
-        <button onClick={() => setFilter("species")}>Species</button>
-        <button onClick={() => setFilter("starship")}>Starships</button>
+      {/* FILTER TABS */}
+      <div className="tabs">
+        {["all","film","character","planet","species","starship"].map((type) => (
+          <button
+            key={type}
+            className={filter === type ? "active" : ""}
+            onClick={() => setFilter(type)}
+          >
+            {type.charAt(0).toUpperCase() + type.slice(1)}
+          </button>
+        ))}
       </div>
 
       {favorites.length === 0 ? (
@@ -60,83 +72,95 @@ function Favorites() {
       ) : filteredFavorites.length === 0 ? (
         <p>No favorites in this category.</p>
       ) : (
-        filteredFavorites.map((fav) => (
-          <div key={fav.id} style={{ marginBottom: 8 }}>
-            <p>{fav.data.name || fav.data.title}</p>
-          </div>
-        ))
+        <div className="grid">
+          {filteredFavorites.map((fav) => (
+            <div key={fav.id} className="card">
+              <h3>{fav.data.name || fav.data.title}</h3>
+            </div>
+          ))}
+        </div>
       )}
 
       <hr />
 
+      {/* MOVIE CHECKLIST */}
       <h1>Movie Checklist</h1>
 
-      <div style={{ marginBottom: 10 }}>
-        <label>
-          <input
-            type="radio"
-            value="release"
-            checked={orderType === "release"}
-            onChange={(e) => setOrderType(e.target.value)}
-          />
+      <div className="tabs">
+        <button
+          className={orderType === "release" ? "active" : ""}
+          onClick={() => setOrderType("release")}
+        >
           Release Order
-        </label>
+        </button>
 
-        <label style={{ marginLeft: 15 }}>
-          <input
-            type="radio"
-            value="chronological"
-            checked={orderType === "chronological"}
-            onChange={(e) => setOrderType(e.target.value)}
-          />
+        <button
+          className={orderType === "chronological" ? "active" : ""}
+          onClick={() => setOrderType("chronological")}
+        >
           Chronological Order
-        </label>
+        </button>
       </div>
 
-      <h2>To Watch</h2>
-      {toWatch.map((film) => (
-        <div key={film.id} style={{ marginBottom: 10 }}>
-          <p>{film.title}</p>
+      {/* USANDO SUA GRID PADRÃO */}
+      <div className="grid">
 
-          <button onClick={() => handleMove(film.id, "watching")}>
-            Start
-          </button>
+        {/* TO WATCH */}
+        <div className="card">
+          <h2>To Watch</h2>
 
-          {blockedId === film.id && (
-            <p>You must watch the previous movie first.</p>
-          )}
+          {toWatch.map((film) => (
+            <div key={film.id} className="card" style={{ marginBottom: "10px" }}>
+              <h3>{film.title}</h3>
+
+              <button onClick={() => handleMove(film.id, "watching")}>
+                Start
+              </button>
+
+              {blockedId === film.id && (
+                <p style={{ color: "red", fontSize: "12px" }}>
+                  You must watch the previous movie first.
+                </p>
+              )}
+            </div>
+          ))}
         </div>
-      ))}
 
-      <h2>Watching</h2>
-      {watching.map((film) => (
-        <div key={film.id} style={{ marginBottom: 10 }}>
-          <p>{film.title}</p>
+        {/* WATCHING */}
+        <div className="card">
+          <h2>Watching</h2>
 
-          <button onClick={() => handleMove(film.id, "toWatch")}>
-            Back
-          </button>
+          {watching.map((film) => (
+            <div key={film.id} className="card" style={{ marginBottom: "10px" }}>
+              <h3>{film.title}</h3>
 
-          <button onClick={() => handleMove(film.id, "watched")}>
-            Finish
-          </button>
+              <button onClick={() => handleMove(film.id, "toWatch")}>
+                Back
+              </button>
 
-          {blockedId === film.id && (
-            <p>You must watch the previous movie first.</p>
-          )}
+              <button onClick={() => handleMove(film.id, "watched")}>
+                Finish
+              </button>
+            </div>
+          ))}
         </div>
-      ))}
 
-      <h2>Watched</h2>
-      {watched.map((film) => (
-        <div key={film.id} style={{ marginBottom: 10 }}>
-          <p>{film.title}</p>
+        {/* WATCHED */}
+        <div className="card">
+          <h2>Watched</h2>
 
-          <button onClick={() => handleMove(film.id, "watching")}>
-            Rewatch
-          </button>
+          {watched.map((film) => (
+            <div key={film.id} className="card" style={{ marginBottom: "10px" }}>
+              <h3>{film.title}</h3>
+
+              <button onClick={() => handleMove(film.id, "watching")}>
+                Rewatch
+              </button>
+            </div>
+          ))}
         </div>
-      ))}
+
+      </div>
     </div>
   );
 }

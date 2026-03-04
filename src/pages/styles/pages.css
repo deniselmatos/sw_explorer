@@ -1,0 +1,119 @@
+body {
+  background: #efefef;
+  font-family: Georgia, serif;
+  margin: 0;
+}
+
+/* ================= HOME ================= */
+
+.home-container {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.home-title {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+.home-subtitle {
+  font-style: italic;
+  margin-bottom: 40px;
+}
+
+.home-text {
+  text-align: justify;
+  line-height: 1.8;
+  margin-bottom: 30px;
+}
+
+.home-final-line {
+  text-align: center;
+  font-weight: bold;
+  margin-top: 30px;
+}
+
+.home-button {
+  background: #dcdcdc;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.home-button:hover {
+  background: #cfcfcf;
+}
+
+/* ================= EXPLORE ================= */
+
+.explore-page {
+  max-width: 1100px;
+  margin: 40px auto;
+  background: #f5f5f7;
+  padding: 50px 40px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+/* Título */
+.explore-page h1 {
+  margin-bottom: 30px;
+}
+
+/* Filtros (Search + Select) */
+.explore-filters {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 60px; /* 🔥 espaço maior antes dos blocos */
+}
+
+/* Input e Select */
+.explore-page input,
+.explore-page select {
+  padding: 10px 18px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  min-width: 220px;
+  transition: 0.2s;
+}
+
+.explore-page input:focus,
+.explore-page select:focus {
+  outline: none;
+  border-color: #999;
+}
+
+/* Espaço extra da grid */
+.explore-page .grid {
+  margin-top: 10px;
+}
+
+/* ================= FAVORITES ================= */
+
+.favorites-page {
+  max-width: 1100px;
+  margin: 40px auto;
+  background: #f5f5f7;
+  padding: 50px 40px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.favorites-page h1 {
+  margin-bottom: 30px;
+}
+
+hr {
+  margin: 50px 0;
+}
+
+h2 {
+  margin-top: 40px;
+}
