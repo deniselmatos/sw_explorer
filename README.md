@@ -1,20 +1,117 @@
-HEAD
-# React + Vite
+# Star Wars Explorer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Star Wars Explorer é uma aplicação web desenvolvida com Vite e React que permite explorar o universo de Star Wars utilizando dados da SWAPI (Star Wars API) e da Wikipedia REST API.
 
-Currently, two official plugins are available:
+A aplicação permite navegar por personagens, planetas, naves, espécies e filmes. Também inclui um sistema de favoritos e um checklist de acompanhamento dos filmes com controle de ordem e progressão.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## React Compiler
+## Visão Geral
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Este projeto foi desenvolvido como aplicação prática de estudo em React, com foco em:
 
-## Expanding the ESLint configuration
+- Arquitetura baseada em componentes
+- Gerenciamento de estado global com Context API
+- Consumo de APIs externas
+- Roteamento com React Router
+- Renderização condicional
+- Filtros e ordenação de dados
+- Persistência de dados com LocalStorage
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
 
-# sw_explorer
+## Tecnologias Utilizadas
 
+- Vite
+- React
+- React Router DOM
+- Context API
+- JavaScript (ES6+)
+- SWAPI (https://swapi.dev)
+- Wikipedia REST API
+
+
+## Principais Funcionalidades
+
+### 1. Página Inicial
+
+- Introdução ao universo de Star Wars
+- Navegação para a página Explorer
+
+
+### 2. Página Explorer
+
+Navegação por abas entre:
+
+- Personagens
+- Planetas
+- Naves
+- Espécies
+- Filmes
+
+Cada seção possui:
+
+- Campo de busca
+- Filtros dinâmicos (gênero, clima, classificação etc.)
+- Modal com informações detalhadas
+- Botão para adicionar/remover dos favoritos
+- Integração com imagem e descrição da Wikipedia (quando disponível)
+
+
+### 3. Sistema de Favoritos
+
+O usuário pode:
+
+- Adicionar e remover favoritos
+- Filtrar favoritos por tipo:
+  - Filme
+  - Personagem
+  - Planeta
+  - Espécie
+  - Nave
+- Manter os favoritos salvos mesmo após atualizar a página
+
+Os favoritos são gerenciados globalmente via Context API.
+
+
+### 4. Sistema de Ordenação dos Filmes
+
+Os filmes podem ser ordenados por:
+
+- Ordem de Lançamento
+- Ordem Cronológica
+
+A ordenação é controlada dinamicamente pelo estado global da aplicação.
+
+
+### 5. Checklist de Filmes
+
+Os filmes são organizados em três categorias:
+
+- Para Assistir
+- Assistindo
+- Assistido
+
+Regras de funcionamento:
+
+- Não é possível iniciar um filme sem que o anterior (na ordem selecionada) esteja marcado como assistido.
+- O status é controlado separadamente para cada tipo de ordenação.
+- A validação da progressão é feita no contexto global.
+
+
+
+## Como Rodar o Projeto
+
+### 1. Clonar o repositório
+
+git clone <https://github.com/deniselmatos/sw_explorer>
+
+### 2. Acessar a pasta do projeto
+
+cd nome-do-projeto
+
+### 3. Instalar as dependências
+
+npm install
+
+### 4. Executar o projeto
+
+npm run dev
