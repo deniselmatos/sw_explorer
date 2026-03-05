@@ -4,39 +4,54 @@ import { getFilms } from "../services/api";
 const AppContext = createContext();
 
 export function AppProvider({ children }) {
-  const [films, setFilms] = useState([]);
-  const [orderType, setOrderType] = useState("release");
 
-  const [favorites, setFavorites] = useState(() => {
-    const saved = localStorage.getItem("favorites");
-    return saved ? JSON.parse(saved) : [];
-  });
+const [orderType, setOrderType] = useState("release");
+const [films, setFilms] = useState([]);
 
-  useEffect(() => {
-    async function loadFilms() {
-      const data = await getFilms();
 
-      const formatted = data.map((film) => ({
-        id: `film-${film.episode_id}`,
-        title: film.title,
-        episode_id: film.episode_id,
-        release_date: film.release_date,
-        opening_crawl: film.opening_crawl,
-        status: {
-          release: "toWatch",
-          chronological: "toWatch"
-        }
-      }));
+const [favorites, setFavorites] = useState(() => {
+  const saved = localStorage.getItem("favorites");
+  return saved ? JSON.parse(saved) : [];
+});
 
-      setFilms(formatted);
-    }
+useEffect(() => {
+  async function loadFilms() {
 
-    loadFilms();
-  }, []);
+    const savedStatus =
+      JSON.parse(localStorage.getItem("filmStatus")) || {};
+
+    const data = await getFilms();
+
+    const formatted = data.map((film) => ({
+      id: `film-${film.episode_id}`,
+      title: film.title,
+      episode_id: film.episode_id,
+      release_date: film.release_date,
+      opening_crawl: film.opening_crawl,
+      status: savedStatus[`film-${film.episode_id}`] || {
+        release: "toWatch",
+        chronological: "toWatch"
+      }
+    }));
+
+    setFilms(formatted);
+  }
+
+  loadFilms();
+}, []);
 
   useEffect(() => {
     localStorage.setItem("favorites", JSON.stringify(favorites));
   }, [favorites]);
+
+useEffect(() => {
+  if (films.length === 0) return;
+  const statusOnly = {};
+  films.forEach((film) => {
+    statusOnly[film.id] = film.status;
+  });
+  localStorage.setItem("filmStatus", JSON.stringify(statusOnly));
+}, [films]);
 
   function getSortedFilms(type = orderType) {
     const sorted = [...films];
